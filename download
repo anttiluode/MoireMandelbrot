@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.DS_Store
+.gradio/
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
