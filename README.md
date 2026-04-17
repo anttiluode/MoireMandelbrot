@@ -1,17 +1,8 @@
----
-title: Moiré-Mandelbrot
-emoji: 🌊
-colorFrom: purple
-colorTo: blue
-sdk: gradio
-sdk_version: 4.44.1
-python_version: "3.10"
-app_file: app.py
-pinned: false
-license: mit
----
-
 # 🌊 The Moiré-Mandelbrot
+
+Test it at huggingface live: 
+
+https://huggingface.co/spaces/Aluode/MoireMandelbrot
 
 **A continuous family of fractals that interpolates between the classical
 Mandelbrot set and a dynamical system whose update rule is Fubini-Study /
