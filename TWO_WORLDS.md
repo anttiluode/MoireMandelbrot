@@ -2,11 +2,24 @@
 
 A small observability / experiment-design demo built directly on the existing Moire-Mandelbrot dynamics.
 
-Run it with:
+Run the original interactive experiment with:
 
 ```bash
 pip install -r requirements.txt
 python two_worlds_app.py
+```
+
+The repo now also contains **Commitment Dissolve**, a video effect driven by the first threshold-crossing time of the same experiment:
+
+```bash
+python commitment_dissolve_app.py
+```
+
+On Windows you can double-click:
+
+```text
+run_two_worlds.bat
+run_commitment_dissolve.bat
 ```
 
 ## The picture
@@ -45,6 +58,46 @@ for a user-controlled toy white-noise scale `sigma`. A white contour marks a cho
 
 The lower-right panel shows how the fraction of available probes above the decision threshold grows as the observation horizon increases.
 
+## Commitment time T*
+
+`two_worlds.py` now also records, per probe location, the first time the selected decision line is crossed:
+
+```text
+T*(c) = min { T : sqrt(D_T^2(c)) / sigma >= threshold }
+```
+
+Locations that never cross within the requested horizon are stored as `NaN` and shown black in the commitment-time map.
+
+This is simply the inverse view of the existing acquisition curve: instead of asking "how much is decidable at time T?", ask "when did this location first become decidable?"
+
+## Commitment Dissolve
+
+`commitment_dissolve.py` treats `T*(x,y)` as a **temporal alpha mask** between any two images A and B.
+
+Early-crossing regions switch first. Late-crossing regions switch later. Regions that never cross stay in A throughout the measured part of the clip. By default the final 12% is an explicitly artistic global completion tail so the MP4 can end exactly on B; set `finish_tail=0` to keep scientifically unresolved pixels in A.
+
+CLI, built-in fractal images:
+
+```bash
+python commitment_dissolve.py -o commitment_demo.mp4
+```
+
+Any two images:
+
+```bash
+python commitment_dissolve.py \
+  --image-a human.png \
+  --image-b robot.png \
+  --lambda-a 0.13 \
+  --lambda-b 0.48 \
+  --horizon 80 \
+  -o human_to_robot.mp4
+```
+
+The exporter writes both the MP4 and a sibling `*_commitment.png` showing the `T*` field that drove it.
+
+This is intentionally an **effect**, not a claim that Moire-Mandelbrot is a video model. It is a first experiment in using a measured/constructed time field as a transition geometry.
+
 ## Why this exists
 
 The point is not to claim a new fractal metric or new information theory.
@@ -68,17 +121,21 @@ This is the intentionally weird public-demo cousin of the measurement-capability
 
 ## Calibrations
 
-`test_two_worlds.py` freezes three boring checks:
+`test_two_worlds.py` freezes the boring checks:
 
-1. `lambda_A == lambda_B` gives exactly zero discrimination everywhere.
+1. `lambda_A == lambda_B` gives exactly zero discrimination everywhere and no finite `T*`.
 2. accumulated evidence is nonnegative and threshold-crossing fraction cannot decrease with `T`.
 3. all four readout modes execute with finite outputs.
+4. unresolved `T*` pixels remain dark in the scientific transition mask.
+5. an enabled artistic finish-tail really does end exactly on image B.
 
 Run:
 
 ```bash
 python -m unittest test_two_worlds -v
 ```
+
+The same tests run in GitHub Actions via `two-worlds-ci`.
 
 ## What this is not
 
@@ -87,6 +144,7 @@ python -m unittest test_two_worlds -v
 - not Connes distance;
 - not thermodynamic entropy;
 - not evidence that phase is intrinsically superior to magnitude;
-- not a replacement for the original Moire-Mandelbrot morph demo.
+- not a replacement for the original Moire-Mandelbrot morph demo;
+- not a claim that denoising/generative time is physical scene time.
 
-It is simply a small application where you can watch an experiment acquire the ability to tell two worlds apart.
+It is simply a small application where you can watch an experiment acquire the ability to tell two worlds apart — and now use the resulting first-crossing field as a weird clock for an actual video transition.
