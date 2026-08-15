@@ -9,7 +9,12 @@ chosen observation y(t). The accumulated squared separation
 
 is the finite-horizon evidence available at that probe.
 
-This is intentionally a visual demo of standard signal discrimination /
+The first threshold-crossing time is also recorded:
+
+    T_star(c) = min { T : sqrt(D_T^2(c)) / sigma >= threshold }
+
+Pixels that never cross within the requested horizon are NaN in T_star.  This
+is intentionally a visual demo of standard signal discrimination /
 observability ideas, not a new information-theory claim.
 """
 from __future__ import annotations
@@ -37,6 +42,7 @@ class TwoWorldResult:
     escaped_b: np.ndarray
     fraction_curve: np.ndarray
     median_dprime_curve: np.ndarray
+    commitment_time: np.ndarray
     xs: np.ndarray
     ys: np.ndarray
 
@@ -104,6 +110,7 @@ def accumulate_discrimination(
 
     fraction_curve = np.zeros(horizon, dtype=np.float64)
     median_dprime_curve = np.zeros(horizon, dtype=np.float64)
+    commitment_time = np.full(c.shape, np.nan, dtype=np.float32)
 
     for it in range(horizon):
         next_a = mixed_step(za, c, float(lambda_a), temperature=float(temperature))
@@ -126,6 +133,8 @@ def accumulate_discrimination(
         d2 += np.sum((ya - yb) ** 2, axis=-1)
 
         dprime = np.sqrt(d2) / float(noise_sigma)
+        crossed = np.isnan(commitment_time) & (dprime >= float(dprime_threshold))
+        commitment_time[crossed] = float(it + 1)
         fraction_curve[it] = np.mean(dprime >= float(dprime_threshold))
         median_dprime_curve[it] = np.median(dprime)
 
@@ -137,6 +146,7 @@ def accumulate_discrimination(
         escaped_b=escaped_b,
         fraction_curve=fraction_curve,
         median_dprime_curve=median_dprime_curve,
+        commitment_time=commitment_time,
         xs=xs,
         ys=ys,
     )
