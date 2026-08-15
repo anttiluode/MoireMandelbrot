@@ -2,6 +2,8 @@ gradio>=4.0
 numpy>=1.24
 matplotlib>=3.7
 Pillow>=10.0
+imageio>=2.34
+imageio-ffmpeg>=0.5
 huggingface_hub<0.30
 pydantic==2.9.2
 starlette<0.41.0
